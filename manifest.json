@@ -5,7 +5,7 @@
   "minimum_chrome_version": "100",
   "manifest_version": 3,
   "background": {
-    "service_worker": "background.js",
+    "service_worker": "background/background.js",
     "type": "module"
   },
   "content_scripts": [
@@ -29,6 +29,7 @@
     "declarativeNetRequestWithHostAccess",
     "declarativeNetRequestFeedback",
     "tabs",
+    "activeTab",
     "contextMenus",
     "storage",
     "activeTab",
