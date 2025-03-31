@@ -1,0 +1,40 @@
+{
+  "name": "screenshot",
+  "version": "0.0.1",
+  "description": "screenshot whole page",
+  "minimum_chrome_version": "100",
+  "manifest_version": 3,
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content/html2canvas.min.js", "content/document_start.js"],
+      "run_at": "document_start"
+    }
+  ],
+
+  "action": {
+    "default_popup": "popup/popup.html"
+  },
+
+  "host_permissions": [
+    "https://*/*",
+    "http://*/*"
+  ],
+  "permissions": [
+    "declarativeNetRequest",
+    "declarativeNetRequestWithHostAccess",
+    "declarativeNetRequestFeedback",
+    "tabs",
+    "contextMenus",
+    "storage",
+    "activeTab",
+    "scripting",
+    "webRequest",
+    "webNavigation",
+    "downloads"
+  ]
+}
