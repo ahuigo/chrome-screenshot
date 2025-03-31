@@ -25,6 +25,7 @@ document.getElementById('captureBtn').addEventListener('click', async () => {
         filename: filename,
         saveAs: true
       });
+      chrome.tabs.create({ url: response.dataUrl });
     } else {
       console.error('Screenshot failed:', response.error);
       showError(response.error);
@@ -36,6 +37,11 @@ document.getElementById('captureBtn').addEventListener('click', async () => {
     // 隐藏进度条
     progressDiv.style.display = 'none';
   }
+});
+
+// 监听下载事件
+chrome.downloads.onChanged.addListener(function (downloadDelta) {
+  console.log('下载状态变化:', downloadDelta);
 });
 
 // 监听来自content script的进度更新

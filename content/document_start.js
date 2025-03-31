@@ -14,6 +14,59 @@ function updateProgress(progress) {
   });
 }
 
+// 等待图片加载完成
+async function waitForImages(doc) {
+  const images = Array.from(doc.getElementsByTagName('img'));
+  const imagePromises = images.map(img => {
+    if (img.complete) return Promise.resolve();
+    return new Promise((resolve, reject) => {
+      img.onload = resolve;
+      img.onerror = reject;
+    });
+  });
+  return Promise.all(imagePromises);
+}
+
+// 等待网络请求完成
+async function waitForNetworkIdle(doc) {
+  return new Promise((resolve) => {
+    let timeoutId;
+    let pendingRequests = 0;
+
+    const observer = new MutationObserver(() => {
+      // 重置超时
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => {
+        observer.disconnect();
+        resolve();
+      }, 1000);
+    });
+
+    observer.observe(doc.body, {
+      childList: true,
+      subtree: true
+    });
+
+    // 设置初始超时
+    timeoutId = setTimeout(() => {
+      observer.disconnect();
+      resolve();
+    }, 1000);
+  });
+}
+
+// 等待动态内容加载
+async function waitForDynamicContent(doc) {
+  // 等待图片加载
+  await waitForImages(doc);
+
+  // 等待网络请求
+  await waitForNetworkIdle(doc);
+
+  // 额外等待以确保渲染完成
+  await new Promise(resolve => setTimeout(resolve, 500));
+}
+
 async function captureFullPage(scrollSpeed = 0.2) {
   const canvas = document.createElement('canvas');
   const context = canvas.getContext('2d');
@@ -63,15 +116,12 @@ async function captureFullPage(scrollSpeed = 0.2) {
           const progress = currentScroll / pageHeight;
           updateProgress(progress);
 
-          // 等待指定的时间
-          await new Promise(resolve => setTimeout(resolve, scrollSpeed * 1000));
-
           // 滚动一页
           currentScroll += viewportHeight;
           clonedWindow.scrollTo(0, currentScroll);
 
-          // 等待内容加载
-          await new Promise(resolve => setTimeout(resolve, 500));
+          // 等待动态内容加载
+          await waitForDynamicContent(clonedDoc);
         }
 
         // 确保进度显示100%

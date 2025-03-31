@@ -35,6 +35,7 @@
     "scripting",
     "webRequest",
     "webNavigation",
+    "downloads.open",
     "downloads"
   ]
 }
