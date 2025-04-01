@@ -13,7 +13,29 @@ function updateProgress(progress) {
     progress: progress
   });
 }
+async function scrollAllTheWayDown(pageHeight, scrollSpeed = 0.2) {
+  const clonedDoc = window.document;
+  // 在克隆的文档中实现滚动
+  const clonedWindow = clonedDoc.defaultView;
+  const viewportHeight = clonedWindow.innerHeight || 1;
+  let currentScroll = 0;
+  const totalPages = Math.ceil(pageHeight / viewportHeight);
 
+  while (currentScroll < pageHeight) {
+    // 更新进度
+    const progress = currentScroll / pageHeight;
+    updateProgress(progress);
+
+    // 滚动一页
+    currentScroll += viewportHeight;
+    clonedWindow.scrollTo(0, currentScroll);
+
+    // 等待指定的时间(让异步内容加载)
+    await new Promise(resolve => setTimeout(resolve, 1000 * scrollSpeed));
+    await waitForImages(clonedDoc);
+  }
+
+}
 
 async function captureFullPage(scrollSpeed = 0.2) {
   const canvas = document.createElement('canvas');
@@ -42,7 +64,7 @@ async function captureFullPage(scrollSpeed = 0.2) {
 
     // 等待一帧以确保滚动完成
     await new Promise(resolve => requestAnimationFrame(resolve));
-
+    await scrollAllTheWayDown(pageHeight, scrollSpeed);
     // 创建截图
     const dataUrl = await html2canvas(document.documentElement, {
       allowTaint: true, // show images?
@@ -54,27 +76,6 @@ async function captureFullPage(scrollSpeed = 0.2) {
       useCORS: true,
       logging: false,
       onclone: async (clonedDoc1) => {
-        const clonedDoc = window.document;
-        // 在克隆的文档中实现滚动
-        const clonedWindow = clonedDoc.defaultView;
-        const viewportHeight = clonedWindow.innerHeight;
-        let currentScroll = 0;
-        const totalPages = Math.ceil(pageHeight / viewportHeight);
-
-        while (currentScroll < pageHeight) {
-          // 更新进度
-          const progress = currentScroll / pageHeight;
-          updateProgress(progress);
-
-          // 滚动一页
-          currentScroll += viewportHeight;
-          clonedWindow.scrollTo(0, currentScroll);
-
-          // 等待指定的时间(让异步内容加载)
-          await new Promise(resolve => setTimeout(resolve, 1000 * scrollSpeed));
-          await waitForImages(clonedDoc);
-        }
-
         // 确保进度显示100%
         updateProgress(1);
       }
