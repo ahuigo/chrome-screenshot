@@ -20,11 +20,11 @@ document.getElementById('captureBtn').addEventListener('click', async () => {
       const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
       const filename = `screenshot-${timestamp}.png`;
 
-      await chrome.downloads.download({
-        url: response.dataUrl,
-        filename: filename,
-        saveAs: true
-      });
+      // await chrome.downloads.download({
+      //   url: response.dataUrl,
+      //   filename: filename,
+      //   saveAs: true
+      // });
       chrome.tabs.create({ url: response.dataUrl });
     } else {
       console.error('Screenshot failed:', response.error);
