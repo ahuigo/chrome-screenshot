@@ -1,7 +1,7 @@
 // 监听来自background的消息
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.action === 'captureFullPage') {
-    fullPageScreenshot(request.scrollSpeed).then(sendResponse)
+    fullPageScreenshot(request.scrollSpeed, 'captureVisibleTab').then(sendResponse)
       .catch(e => {
         console.error(e);
         console.error(e?.message);
@@ -27,7 +27,7 @@ function scrollElementToXCenter(ele) {
   ele.scrollLeft = maxScrollX / 2;
 }
 
-async function fullPageScreenshot(scrollSpeed = 0.2) {
+async function fullPageScreenshot(scrollSpeed = 0.2, action = 'captureVisibleTab') {
   // This request exceeds the MAX_CAPTURE_VISIBLE_TAB_CALLS_PER_SECOND quota.
   if (scrollSpeed < 0.5) {
     scrollSpeed = 0.5;
@@ -71,7 +71,7 @@ async function fullPageScreenshot(scrollSpeed = 0.2) {
     // 请求background脚本捕获当前可见区域
     const dataUrl = await new Promise(resolve => {
       chrome.runtime.sendMessage(
-        { action: 'captureVisibleTab' },
+        { action: action },
         response => resolve(response.dataUrl)
       );
     });

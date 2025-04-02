@@ -1,5 +1,6 @@
 document.getElementById('captureBtn').addEventListener('click', async () => {
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+  const useCaptureTab = document.getElementById('useCaptureTab').checked;
   const scrollSpeed = parseFloat(document.getElementById('scrollSpeed').value);
 
   // 显示进度条
@@ -11,12 +12,19 @@ document.getElementById('captureBtn').addEventListener('click', async () => {
   progressText.textContent = '正在截图: 0%';
 
   try {
-    const response = await chrome.tabs.sendMessage(tab.id, {
-      action: 'captureFullPage',
-      scrollSpeed: scrollSpeed
-    });
+    let response;
+    if (useCaptureTab) {
+      // 使用captureTab
+      response = await chrome.runtime.sendMessage({ action: 'captureTab' });
+    } else {
+      // 使用原有的滚动截图方式
+      response = await chrome.tabs.sendMessage(tab.id, {
+        action: 'captureFullPage',
+        scrollSpeed: scrollSpeed
+      });
+    }
 
-    if (response.success) {
+    if (response?.success || response?.dataUrl) {
       const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
       const filename = `screenshot-${timestamp}.png`;
 
@@ -27,8 +35,8 @@ document.getElementById('captureBtn').addEventListener('click', async () => {
       // });
       chrome.tabs.create({ url: response.dataUrl });
     } else {
-      console.error('Screenshot failed:', response.error);
       showError(response.error);
+      console.error('Screenshot failed:', response.error);
     }
   } catch (error) {
     console.error('Error:', error);
@@ -55,7 +63,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     progressFill.style.width = `${percentage}%`;
     progressText.textContent = `正在截图: ${percentage}%`;
   }
-}); 
+});
 
 function showError(message) {
   const errorDiv = document.getElementById('error');
@@ -65,4 +73,10 @@ function showError(message) {
     errorDiv.style.display = 'none';
   }, 5000);
 }
+
+// 监听复选框变化，控制速度输入框的显示/隐藏
+document.getElementById('useCaptureTab').addEventListener('change', (e) => {
+  const speedControl = document.getElementById('speedControl');
+  speedControl.style.display = e.target.checked ? 'none' : 'flex';
+});
 

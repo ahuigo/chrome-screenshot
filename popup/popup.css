@@ -7,7 +7,17 @@
         padding: 10px;
         text-align: center;
     }
+    
+.checkbox-control {
+    margin: 10px 0;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+}
 
+.checkbox-control input[type="checkbox"] {
+    margin-right: 8px;
+}
     button {
         width: 100%;
         padding: 8px;
