@@ -88,7 +88,10 @@ async function fullPageScreenshot(scrollSpeed = 0.2, action = 'captureVisibleTab
     // canvas.height = Math.min(viewportHeight, eleScrollHeight - i * scrollStep);
     const ctx = canvas.getContext('2d');
     console.log(currentScrollPosition);//ahui123
-    ctx.drawImage(img, 0, 0);
+    // ctx.drawImage(img, 0, 0);
+    // ctx.drawImage(img, 0, 0, img.naturalWidth, img.naturalHeight);
+    ctx.drawImage(img, 0, 0, document.documentElement.offsetWidth, viewportHeight);
+
     console.log(currentScrollPosition);//ahui123
 
     // if (i == 1) {
